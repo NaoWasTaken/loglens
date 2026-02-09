@@ -21,21 +21,7 @@ def analyze(file, findcodes, informationalonly, successonly, redirectonly, error
                 if findcodes:
                     print(f"Codes Found: 1xx - {code_1xx}; 2xx - {code_2xx}; 3xx - {code_3xx}; 4xx - {code_4xx}; 5xx - {code_5xx}")
 
-                if informationalonly:
-                    type = "Informational"
-                    code_xx = code_1xx
-
-                if successonly:
-                    type = "Success"
-                    code_xx = code_2xx
-
-                if redirectonly:
-                    type = "Redirection"
-                    code_xx = code_3xx
-
-                if errorsonly:
-                    type = "Error"
-                    code_xx = code_4xx + code_5xx
+                type, code_xx = get_type(informationalonly, successonly, redirectonly, errorsonly, code_1xx, code_2xx, code_3xx, code_4xx, code_5xx)
         
         elif json:
             if findcodes or errorsonly or informationalonly or successonly or redirectonly:
@@ -44,21 +30,7 @@ def analyze(file, findcodes, informationalonly, successonly, redirectonly, error
                 if findcodes:
                     print(f"Codes Found: 1xx - {code_1xx}; 2xx - {code_2xx}; 3xx - {code_3xx}; 4xx - {code_4xx}; 5xx - {code_5xx}")
 
-                if informationalonly:
-                    type = "Informational"
-                    code_xx = code_1xx
-
-                if successonly:
-                    type = "Success"
-                    code_xx = code_2xx
-
-                if redirectonly:
-                    type = "Redirection"
-                    code_xx = code_3xx
-
-                if errorsonly:
-                    type = "Error"
-                    code_xx = code_4xx + code_5xx
+                type, code_xx = get_type(informationalonly, successonly, redirectonly, errorsonly, code_1xx, code_2xx, code_3xx, code_4xx, code_5xx)
 
         elif nginx:
             if findcodes or errorsonly or informationalonly or successonly or redirectonly:
@@ -66,22 +38,8 @@ def analyze(file, findcodes, informationalonly, successonly, redirectonly, error
                 
                 if findcodes:
                     print(f"Codes Found: 1xx - {code_1xx}; 2xx - {code_2xx}; 3xx - {code_3xx}; 4xx - {code_4xx}; 5xx - {code_5xx}")
-
-                if informationalonly:
-                    type = "Informational"
-                    code_xx = code_1xx
-
-                if successonly:
-                    type = "Success"
-                    code_xx = code_2xx
-
-                if redirectonly:
-                    type = "Redirection"
-                    code_xx = code_3xx
-
-                if errorsonly:
-                    type = "Error"
-                    code_xx = code_4xx + code_5xx
+                
+                type, code_xx = get_type(informationalonly, successonly, redirectonly, errorsonly, code_1xx, code_2xx, code_3xx, code_4xx, code_5xx)
 
         if not findcodes:
             if informationalonly or successonly or redirectonly or errorsonly:
@@ -133,9 +91,16 @@ def count(lines, index):
 
     return code_1xx, code_2xx, code_3xx, code_4xx, code_5xx
 
-def get_type():
-    pass
-
+def get_type(informationalonly, successonly, redirectonly, errorsonly, code_1xx, code_2xx, code_3xx, code_4xx, code_5xx):
+    if informationalonly:
+        return "Informational", code_1xx
+    if successonly:
+        return "Success", code_2xx
+    if redirectonly:
+        return "Redirectional", code_3xx
+    if errorsonly:
+        return "Error", code_4xx + code_5xx
+    return None, 0
 
 if __name__ == "__main__":
     analyze()

@@ -1,5 +1,0 @@
-Oct 10 13:55:36 webserver nginx[1234]: Connection from 192.168.1.1 accepted
-Oct 10 13:56:12 webserver app[5678]: ERROR: Database connection failed - timeout after 30s
-Oct 10 13:57:01 webserver nginx[1234]: 404 Not Found: /missing requested by 172.16.0.3
-Oct 10 13:58:22 webserver app[5678]: INFO: User profile updated successfully
-Oct 10 13:59:45 webserver systemd[1]: Started backup service
