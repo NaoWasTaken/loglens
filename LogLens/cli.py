@@ -7,8 +7,7 @@ import click
 @click.option('--apache', is_flag=True)
 @click.option('--json', is_flag=True)
 @click.option('--nginx', is_flag=True)
-@click.option('--syslog', is_flag=True)
-def analyze(file, findcodes, errorsonly, apache, json, nginx, syslog):
+def analyze(file, findcodes, errorsonly, apache, json, nginx):
     try:
         with open(file) as fd:
             lines = []
@@ -26,15 +25,15 @@ def analyze(file, findcodes, errorsonly, apache, json, nginx, syslog):
                     if findcodes:
                         if codes[8] == "200":
                             code_200 +=1
-                    elif codes[8] == "404":
+                    if codes[8] == "404":
                         code_404 +=1
-                    elif codes[8] == "500":
+                    if codes[8] == "500":
                         code_500 +=1
                 
                 if findcodes:
                     print(f"Codes Found: 200 - {code_200}; 404 - {code_404}; 500 - {code_500}")
 
-                elif errorsonly:
+                if errorsonly:
                     print(f"Errors Found: 404 - {code_404}; 500 - {code_500}")
 
             if not findcodes and not errorsonly:
@@ -47,15 +46,36 @@ def analyze(file, findcodes, errorsonly, apache, json, nginx, syslog):
                     if findcodes:
                         if codes[5] == "200,":
                             code_200 +=1
-                        elif codes[5] == "404,":
-                            code_404 +=1
-                        elif codes[5] == "500,":
-                            code_500 +=1
+                    if codes[5] == "404,":
+                        code_404 +=1
+                    if codes[5] == "500,":
+                        code_500 +=1
 
                 if findcodes:
                     print(f"Codes Found: 200 - {code_200}; 404 - {code_404}; 500 - {code_500}")
 
-                elif errorsonly:
+                if errorsonly:
+                    print(f"Errors Found: 404 - {code_404}; 500 - {code_500}")
+
+            if not findcodes and not errorsonly:
+                print("Successfully Analyzed File")
+
+        elif nginx:
+            if findcodes or errorsonly:
+                for _ in lines:
+                    codes = _.split()
+                    if findcodes:
+                        if codes[8] == "200":
+                            code_200 +=1
+                    if codes[8] == "404":
+                        code_404 +=1
+                    if codes[8] == "500":
+                        code_500 +=1
+
+                if findcodes:
+                    print(f"Codes Found: 200 - {code_200}; 404 - {code_404}; 500 - {code_500}")
+
+                if errorsonly:
                     print(f"Errors Found: 404 - {code_404}; 500 - {code_500}")
 
             if not findcodes and not errorsonly:
