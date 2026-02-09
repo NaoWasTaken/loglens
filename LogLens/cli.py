@@ -15,31 +15,11 @@ def analyze(file, findcodes, informationalonly, successonly, redirectonly, error
         lines = read(file)
 
         if apache:
-            if findcodes or errorsonly or informationalonly or successonly or redirectonly:
-                code_1xx, code_2xx, code_3xx, code_4xx, code_5xx = count(lines, 8)
-                
-                if findcodes:
-                    print(f"Codes Found: 1xx - {code_1xx}; 2xx - {code_2xx}; 3xx - {code_3xx}; 4xx - {code_4xx}; 5xx - {code_5xx}")
-
-                type, code_xx = get_type(informationalonly, successonly, redirectonly, errorsonly, code_1xx, code_2xx, code_3xx, code_4xx, code_5xx)
-        
+            type, code_xx = super_mega_function_that_does_it_all_type_shit(lines, 8, findcodes, informationalonly, successonly, redirectonly, errorsonly)
         elif json:
-            if findcodes or errorsonly or informationalonly or successonly or redirectonly:
-                code_1xx, code_2xx, code_3xx, code_4xx, code_5xx = count(lines, 5)
-                
-                if findcodes:
-                    print(f"Codes Found: 1xx - {code_1xx}; 2xx - {code_2xx}; 3xx - {code_3xx}; 4xx - {code_4xx}; 5xx - {code_5xx}")
-
-                type, code_xx = get_type(informationalonly, successonly, redirectonly, errorsonly, code_1xx, code_2xx, code_3xx, code_4xx, code_5xx)
-
+            type, code_xx = super_mega_function_that_does_it_all_type_shit(lines, 5, findcodes, informationalonly, successonly, redirectonly, errorsonly)
         elif nginx:
-            if findcodes or errorsonly or informationalonly or successonly or redirectonly:
-                code_1xx, code_2xx, code_3xx, code_4xx, code_5xx = count(lines, 8)
-                
-                if findcodes:
-                    print(f"Codes Found: 1xx - {code_1xx}; 2xx - {code_2xx}; 3xx - {code_3xx}; 4xx - {code_4xx}; 5xx - {code_5xx}")
-                
-                type, code_xx = get_type(informationalonly, successonly, redirectonly, errorsonly, code_1xx, code_2xx, code_3xx, code_4xx, code_5xx)
+            type, code_xx = super_mega_function_that_does_it_all_type_shit(lines, 8, findcodes, informationalonly, successonly, redirectonly, errorsonly)
 
         if not findcodes:
             if informationalonly or successonly or redirectonly or errorsonly:
@@ -100,6 +80,16 @@ def get_type(informationalonly, successonly, redirectonly, errorsonly, code_1xx,
         return "Redirectional", code_3xx
     if errorsonly:
         return "Error", code_4xx + code_5xx
+    return None, 0
+
+def super_mega_function_that_does_it_all_type_shit(lines, index, findcodes, informationalonly, successonly, redirectonly, errorsonly): # I need to rename this lmao
+    if findcodes or errorsonly or informationalonly or successonly or redirectonly:
+        code_1xx, code_2xx, code_3xx, code_4xx, code_5xx = count(lines, index)
+        
+        if findcodes:
+            print(f"Codes Found: 1xx - {code_1xx}; 2xx - {code_2xx}; 3xx - {code_3xx}; 4xx - {code_4xx}; 5xx - {code_5xx}")
+        
+        return get_type(informationalonly, successonly, redirectonly, errorsonly, code_1xx, code_2xx, code_3xx, code_4xx, code_5xx)
     return None, 0
 
 if __name__ == "__main__":
