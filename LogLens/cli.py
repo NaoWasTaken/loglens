@@ -5,7 +5,10 @@ import click
 @click.option('--findcodes', is_flag=True)
 @click.option('--errorsonly', is_flag=True)
 @click.option('--apache', is_flag=True)
-def analyze(file, findcodes, errorsonly, apache):
+@click.option('--json', is_flag=True)
+@click.option('--nginx', is_flag=True)
+@click.option('--syslog', is_flag=True)
+def analyze(file, findcodes, errorsonly, apache, json, nginx, syslog):
     try:
         with open(file) as fd:
             lines = []
@@ -28,6 +31,27 @@ def analyze(file, findcodes, errorsonly, apache):
                     elif codes[8] == "500":
                         code_500 +=1
                 
+                if findcodes:
+                    print(f"Codes Found: 200 - {code_200}; 404 - {code_404}; 500 - {code_500}")
+
+                elif errorsonly:
+                    print(f"Errors Found: 404 - {code_404}; 500 - {code_500}")
+
+            if not findcodes and not errorsonly:
+                print("Successfully Analyzed File")
+        
+        elif json:
+            if findcodes or errorsonly:
+                for _ in lines:
+                    codes = _.split()
+                    if findcodes:
+                        if codes[5] == "200,":
+                            code_200 +=1
+                        elif codes[5] == "404,":
+                            code_404 +=1
+                        elif codes[5] == "500,":
+                            code_500 +=1
+
                 if findcodes:
                     print(f"Codes Found: 200 - {code_200}; 404 - {code_404}; 500 - {code_500}")
 
