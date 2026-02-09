@@ -12,14 +12,17 @@ import click
 @click.option('--nginx', is_flag=True)
 def analyze(file, findcodes, informationalonly, successonly, redirectonly, errorsonly, apache, json, nginx):
     try:
+        
         lines = read(file)
 
         if apache:
-            type, code_xx = super_mega_function_that_does_it_all_type_shit(lines, 8, findcodes, informationalonly, successonly, redirectonly, errorsonly)
+            type, code_xx = process(lines, 8, findcodes, informationalonly, successonly, redirectonly, errorsonly)
+
         elif json:
-            type, code_xx = super_mega_function_that_does_it_all_type_shit(lines, 5, findcodes, informationalonly, successonly, redirectonly, errorsonly)
+            type, code_xx = process(lines, 5, findcodes, informationalonly, successonly, redirectonly, errorsonly)
+
         elif nginx:
-            type, code_xx = super_mega_function_that_does_it_all_type_shit(lines, 8, findcodes, informationalonly, successonly, redirectonly, errorsonly)
+            type, code_xx = process(lines, 8, findcodes, informationalonly, successonly, redirectonly, errorsonly)
 
         if not findcodes:
             if informationalonly or successonly or redirectonly or errorsonly:
@@ -74,15 +77,19 @@ def count(lines, index):
 def get_type(informationalonly, successonly, redirectonly, errorsonly, code_1xx, code_2xx, code_3xx, code_4xx, code_5xx):
     if informationalonly:
         return "Informational", code_1xx
+    
     if successonly:
         return "Success", code_2xx
+    
     if redirectonly:
         return "Redirectional", code_3xx
+    
     if errorsonly:
         return "Error", code_4xx + code_5xx
+    
     return None, 0
 
-def super_mega_function_that_does_it_all_type_shit(lines, index, findcodes, informationalonly, successonly, redirectonly, errorsonly): # I need to rename this lmao
+def process(lines, index, findcodes, informationalonly, successonly, redirectonly, errorsonly):
     if findcodes or errorsonly or informationalonly or successonly or redirectonly:
         code_1xx, code_2xx, code_3xx, code_4xx, code_5xx = count(lines, index)
         
@@ -90,6 +97,7 @@ def super_mega_function_that_does_it_all_type_shit(lines, index, findcodes, info
             print(f"Codes Found: 1xx - {code_1xx}; 2xx - {code_2xx}; 3xx - {code_3xx}; 4xx - {code_4xx}; 5xx - {code_5xx}")
         
         return get_type(informationalonly, successonly, redirectonly, errorsonly, code_1xx, code_2xx, code_3xx, code_4xx, code_5xx)
+    
     return None, 0
 
 if __name__ == "__main__":
