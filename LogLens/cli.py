@@ -1,5 +1,4 @@
 import click
-import sys
 
 @click.command()
 @click.argument('file')
@@ -37,6 +36,7 @@ def analyze(file, findcodes, errorsonly, apache):
 
             if not findcodes and not errorsonly:
                 print("Successfully Analyzed File")
+
     except FileNotFoundError:
         print(f"Error: Could not find file '{file}'")
 
