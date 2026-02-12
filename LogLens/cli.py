@@ -2,6 +2,30 @@ import click
 import re
 from datetime import datetime
 
+# TODO: maybe add more codes later
+CODE_EXPLANATIONS = {
+    "100": "Continue - server got the headers, client can keep going",
+    "101": "Switching Protocols - server is switching to a different protocol as requested",
+    "200": "OK - request worked",
+    "201": "Created - request worked and a new resource was created",
+    "204": "No Content - request worked but nothing to return",
+    "301": "Moved Permanently - resource has a new permanent URL",
+    "302": "Found - resource temporarily lives somewhere else",
+    "304": "Not Modified - cached version is still good, no need to re-send",
+    "400": "Bad Request - server couldn't parse or understand the request",
+    "401": "Unauthorized - need to authenticate first",
+    "403": "Forbidden - server understood but won't allow it",
+    "404": "Not Found - resource doesn't exist at this URL",
+    "405": "Method Not Allowed - that HTTP method isn't supported here",
+    "408": "Request Timeout - server gave up waiting for the client",
+    "429": "Too Many Requests - slow down, rate limit hit",
+    "500": "Internal Server Error - something broke on the server side",
+    "501": "Not Implemented - server doesn't support whatever was requested",
+    "502": "Bad Gateway - got a bad response from an upstream server",
+    "503": "Service Unavailable - server can't handle requests right now",
+    "504": "Gateway Timeout - upstream server didn't respond in time",
+}
+
 @click.command()
 @click.argument('file')
 @click.option('--findcodes', is_flag=True)
@@ -12,32 +36,29 @@ from datetime import datetime
 @click.option('--apache', is_flag=True)
 @click.option('--json', is_flag=True)
 @click.option('--nginx', is_flag=True)
+@click.option('--explain', is_flag=True)
 @click.option('--from-date', type=str, help='Start date: mm/dd/yyyy')
 @click.option('--to-date', type=str, help='End date: mm/dd/yyyy')
-def analyze(file, findcodes, informationalonly, successonly, redirectonly, errorsonly, apache, json, nginx, from_date, to_date):
+def analyze(file, findcodes, informationalonly, successonly, redirectonly, errorsonly, apache, json, nginx, explain, from_date, to_date):
 
-    format_flags = [apache, json, nginx]
-    code_flags = [findcodes, informationalonly, successonly, redirectonly, errorsonly]
-
-    if sum(format_flags) > 1 or sum(code_flags) > 1:
-        print("Only one format or search flag accepted")
+    if (apache and nginx) or (apache and json) or (json and nginx):
+        print("Only one format flag accepted")
         return
 
-    format_map = {
-        "apache": ("apache", 8),
-        "json": ("json", 5),
-        "nginx": ("nginx", 8),
-    }
+    filter_flags = [findcodes, informationalonly, successonly, redirectonly, errorsonly]
+    if sum(filter_flags) > 1:
+        print("Only one search flag accepted")
+        return
 
     if apache:
-        log_format, index = format_map["apache"]
-
+        log_format = "apache"
+        index = 8
     elif json:
-        log_format, index = format_map["json"]
-
+        log_format = "json"
+        index = 5
     elif nginx:
-        log_format, index = format_map["nginx"]
-
+        log_format = "nginx"
+        index = 8
     else:
         print("Please specify a log format: --apache, --json, or --nginx")
         return
@@ -45,11 +66,11 @@ def analyze(file, findcodes, informationalonly, successonly, redirectonly, error
     try:
         lines = read(file)
         from_date, to_date = date_filter(from_date, to_date)
-        type, code_xx = process(lines, index, findcodes, informationalonly, successonly, redirectonly, errorsonly, from_date, to_date, log_format)
+        type, codes = process(lines, index, findcodes, informationalonly, successonly, redirectonly, errorsonly, from_date, to_date, log_format, explain)
 
         if not findcodes:
             if informationalonly or successonly or redirectonly or errorsonly:
-                statement = codes_print(type, code_xx)
+                statement = codes_print(type, codes, explain)
                 print(statement)
 
     except FileNotFoundError:
@@ -65,15 +86,19 @@ def analyze(file, findcodes, informationalonly, successonly, redirectonly, error
         print(f"An unexpected error occured: {e}")
 
 def read(file):
-
     with open(file) as fd:
         return fd.readlines()
 
-def codes_print(type, code):
+def codes_print(type, codes, explain):
 
-    statement = f"{type} Codes Found - {code}"
+    lines = [f"{type} Codes Found:\n"]
+    for code, cnt in sorted(codes.items()):
+        lines.append(f"{code}: {cnt}")
+        if explain:
+            explanation = CODE_EXPLANATIONS.get(code, "Unknown code.")
+            lines.append(f"{code} - {explanation}\n")
 
-    return statement
+    return "\n".join(lines)
 
 def parse_line_date(line, log_format):
 
@@ -108,77 +133,65 @@ def in_date_range(line_date, from_date, to_date):
 
 def count(lines, index, from_date, to_date, log_format):
 
-    code_1xx = 0
-    code_2xx = 0
-    code_3xx = 0
-    code_4xx = 0
-    code_5xx = 0
+    code_counts = {}
 
-    for _ in lines:
+    for line in lines:
         if from_date or to_date:
-            line_date = parse_line_date(_, log_format)
+            line_date = parse_line_date(line, log_format)
             if not in_date_range(line_date, from_date, to_date):
                 continue
 
-        codes = _.split()
+        parts = line.split()
         try:
-            if codes[index][0] == "1":
-                code_1xx += 1
-
-            elif codes[index][0] == "2":
-                code_2xx += 1
-
-            elif codes[index][0] == "3":
-                code_3xx += 1
-
-            elif codes[index][0] == "4":
-                code_4xx += 1
-
-            elif codes[index][0] == "5":
-                code_5xx += 1
+            code = parts[index]
+            if code[0] in ("1", "2", "3", "4", "5"):
+                code_counts[code] = code_counts.get(code, 0) + 1
 
         except IndexError:
             continue
 
-    return code_1xx, code_2xx, code_3xx, code_4xx, code_5xx
+    return code_counts
 
-def get_type(informationalonly, successonly, redirectonly, errorsonly, code_1xx, code_2xx, code_3xx, code_4xx, code_5xx):
-
+def filter_by_category(informationalonly, successonly, redirectonly, errorsonly, code_counts):
     if informationalonly:
-        return "Informational", code_1xx
+        return "Informational", {k: v for k, v in code_counts.items() if k[0] == "1"}
 
     if successonly:
-        return "Success", code_2xx
+        return "Success", {k: v for k, v in code_counts.items() if k[0] == "2"}
 
     if redirectonly:
-        return "Redirectional", code_3xx
+        return "Redirectional", {k: v for k, v in code_counts.items() if k[0] == "3"}
 
     if errorsonly:
-        return "Error", code_4xx + code_5xx
+        return "Error", {k: v for k, v in code_counts.items() if k[0] in ("4", "5")}
 
-    return None, 0
+    return None, {}
 
-def process(lines, index, findcodes, informationalonly, successonly, redirectonly, errorsonly, from_date, to_date, log_format):
+def process(lines, index, findcodes, informationalonly, successonly, redirectonly, errorsonly, from_date, to_date, log_format, explain):
 
     if findcodes or errorsonly or informationalonly or successonly or redirectonly:
-        code_1xx, code_2xx, code_3xx, code_4xx, code_5xx = count(lines, index, from_date, to_date, log_format)
+        code_counts = count(lines, index, from_date, to_date, log_format)
 
         if findcodes:
-            print(f"Codes Found: 1xx - {code_1xx}; 2xx - {code_2xx}; 3xx - {code_3xx}; 4xx - {code_4xx}; 5xx - {code_5xx}")
+            output = ["Codes Found:\n"]
+            for code, cnt in sorted(code_counts.items()):
+                output.append(f"{code}: {cnt}")
+                if explain:
+                    explanation = CODE_EXPLANATIONS.get(code, "Unknown code.")
+                    output.append(f"{code} - {explanation}\n")
+            print("\n".join(output))
 
-        return get_type(informationalonly, successonly, redirectonly, errorsonly, code_1xx, code_2xx, code_3xx, code_4xx, code_5xx)
+        return filter_by_category(informationalonly, successonly, redirectonly, errorsonly, code_counts)
 
-    return None, 0
+    return None, {}
 
 def date_filter(fromdate, todate):
 
     try:
         if fromdate and todate:
             return datetime.strptime(fromdate, "%m/%d/%Y"), datetime.strptime(todate, "%m/%d/%Y")
-
         elif fromdate:
             return datetime.strptime(fromdate, "%m/%d/%Y"), None
-
         elif todate:
             return None, datetime.strptime(todate, "%m/%d/%Y")
 
