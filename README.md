@@ -4,8 +4,8 @@ A CLI tool for analyzing Apache, Nginx, and JSON log files
 
 ## Installation
 
-git clone https://github.com/naowastaken/loglens.git
-cd loglens
+git clone https://github.com/naowastaken/loglens.git  <br>
+cd loglens  <br>
 pip install -e .
 
 ## Usage
