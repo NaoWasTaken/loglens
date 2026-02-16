@@ -1,6 +1,6 @@
 # LogLens
 
-A CLI tool for analyzing Apache, Nging, and JSON log files
+A CLI tool for analyzing Apache, Nginx, and JSON log files
 
 ## Installation
 
