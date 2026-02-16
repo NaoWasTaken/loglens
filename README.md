@@ -10,7 +10,7 @@ pip install -e .
 
 ## Usage
 
-loglens <file> --<format> --<filter>
+loglens file --format --filter
 
 ## Formats (pick one)
 
