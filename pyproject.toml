@@ -1,12 +1,12 @@
 [build-system]
 requires = ["setuptools"]
-build-backend = "setuptools.backends.legacy:build"
+build-backend = "setuptools.build_meta"
 
 [project]
-name = "LogLens"
+name = "loglens"
 version = "0.1.0"
 requires-python = ">=3.8"
 dependencies = ["click"]
 
-[project.scripts]
-loglens = "loglens.cli:main"
+[project.scripts] 
+loglens = "loglens.cli:analyze"
