@@ -14,26 +14,26 @@ loglens file --format --filter
 
 ## Formats (pick one)
 
---apache
---nginx
---json
+--apache  <br>
+--nginx  <br>
+--json  <br>
 
 ## Filters (pick one)
 
---findcodes              Show all status codes and counts
---errorsonly             Show 4xx and 5xx errors
---successonly            Show 2xx responses
---redirectonly           Show 3xx redirects
---informationalonly      Show 1xx responses
+--findcodes              Show all status codes and counts  <br>
+--errorsonly             Show 4xx and 5xx errors  <br>
+--successonly            Show 2xx responses  <br>
+--redirectonly           Show 3xx redirects  <br>
+--informationalonly      Show 1xx responses  <br>
 
 ## Options
 
---explain                Human description of each status code
---from-date              Start date (mm/dd/yyyy)
---to-date                End date (mm/dd/yyyy)
+--explain                Human description of each status code  <br>
+--from-date              Start date (mm/dd/yyyy)  <br>
+--to-date                End date (mm/dd/yyyy)  <br>
 
 ## Examples
 
-loglens server.log --apache --findcodes
-loglens server.log --apache --errorsonly --explain
+loglens server.log --apache --findcodes  <br>
+loglens server.log --apache --errorsonly --explain  <br>
 loglens server.log --nginx --errorsonly --from-date 01/01/2026 --to-date 01/31/2026
